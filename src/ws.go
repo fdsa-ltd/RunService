@@ -25,8 +25,9 @@ func (p *program) Start(s service.Service) error {
 	go p.run()
 	return nil
 }
+
 func (p *program) run() {
-	cmd = exec.Command(p.Name, p.Args...)
+	cmd = exec.Command(p.Name, p.Args[1:]...)
 	cmd.Dir = p.WorkSpace
 	cmd.Env = append(os.Environ(), p.Env...)
 	stdout, err := os.OpenFile(p.WorkSpace+"/out.log", os.O_CREATE|os.O_WRONLY, 0600)
@@ -49,52 +50,65 @@ func (p *program) Stop(s service.Service) error {
 	return nil
 }
 func usage() {
-	fmt.Printf("Usage:\n%s [arguments] <command>\n", os.Args[0])
-	fmt.Println("\nThe arguments are:")
-	flag.PrintDefaults()
+	fmt.Printf("Usage:\n\nws <command> [service name] options.. args ... \n")
 	fmt.Println("\nThe command should be:")
-	fmt.Printf("  %s\t %s\n", "install", "install service")
-	fmt.Printf("  %s\t %s\n", "remove", "remove service")
-}
-func main() {
-	env := flag.String("e", "", "specify serivce application `env`, eg. 'key1=value1,key2=value2'")
-	dir := flag.String("w", "", "specify service application  `workspace`")
-	serviceName := flag.String("n", "", "service `name`")
-	description := flag.String("d", "", "service `description`")
-	executable := flag.String("p", "", "specify service application `path`")
-	parameter := flag.String("a", "", "specify serivce application `args` using ','")
-	help := flag.Bool("help", false, "for more help")
-	flag.Parse()
+	fmt.Printf("  %s\t  %s\n", "install", "install service")
+	fmt.Printf("  %s\t%s\n", "uninstall", "remove service")
+	fmt.Printf("  %s\t    %s\n", "start", "start service")
+	fmt.Printf("  %s\t     %s\n", "stop", "stop service")
+	fmt.Printf("  %s\t  %s\n", "restart", "restart service")
+	fmt.Printf("  %s\t   %s\n", "status", "remove service")
 
-	if *help || len(flag.Args()) == 0 {
+	fmt.Println("\nThe options are:")
+	cmdLine.PrintDefaults()
+	fmt.Println("\nUsing args to specify args for application")
+}
+
+var cmdLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+func main() {
+
+	env := cmdLine.String("e", "", "specify serivce application `env`, eg. 'key1=value1,key2=value2'")
+	dir := cmdLine.String("w", "", "specify service application  `workspace`")
+	path := cmdLine.String("p", "", "specify service application `path`")
+
+	if len(os.Args) < 3 {
 		usage()
 		return
 	}
+	err := cmdLine.Parse(os.Args[3:])
+	if err != nil {
+		usage()
+		Error.Fatal("Parse args error: ", err.Error())
+		return
+	}
+	cmd := os.Args[1]
+	serviceName := os.Args[2]
+
 	workspace := *dir
 	if workspace == "" {
 		workspace, _ = os.Getwd()
 	}
-	cmd := flag.Args()[0]
+
 	args := []string{
-		"-n", *serviceName,
-		"-d", *description,
-		"-p", *executable,
-		"-a", *parameter,
-		"-e", *env,
-		"-w", workspace,
 		"run",
+		serviceName,
+		"-p", *path,
+		"-w", workspace,
+		"-e", *env,
 	}
+	args = append(args, cmdLine.Args()...)
 
 	svcConfig := &service.Config{
-		Name:             *serviceName, //服务名称
-		DisplayName:      *serviceName, //显示名称
-		Description:      *description, //服务描述
+		Name:             serviceName, //服务名称
+		DisplayName:      serviceName, //显示名称
+		Description:      serviceName, //服务描述
 		Arguments:        args,
 		WorkingDirectory: workspace,
 	}
 	prg := &program{
-		Name:      *executable,
-		Args:      strings.Split(*parameter, ","),
+		Name:      *path,
+		Args:      cmdLine.Args(),
 		WorkSpace: workspace,
 		Env:       strings.Split(*env, ","),
 	}
@@ -112,15 +126,45 @@ func main() {
 			usage()
 			log.Fatal("install new service error: ", err.Error())
 		}
-		log.Println(*serviceName, " is installed")
+		log.Println(serviceName, " is installed")
 		return
-	case "remove":
+	case "uninstall":
 		err := s.Uninstall()
 		if err != nil {
 			usage()
 			log.Fatal("remove service ", serviceName, " error: ", err.Error())
 		}
-		log.Println(*serviceName + " is removed")
+		log.Println(serviceName + " is removed")
+		return
+	case "start":
+		err := s.Start()
+		if err != nil {
+			usage()
+			log.Fatal("run service error: ", err.Error())
+		}
+		return
+	case "stop":
+		err := s.Stop()
+		if err != nil {
+			usage()
+			log.Fatal("run service error: ", err.Error())
+		}
+		return
+	case "restart":
+		err := s.Restart()
+		if err != nil {
+			usage()
+			log.Fatal("run service error: ", err.Error())
+		}
+		return
+	case "status":
+		status, err := s.Status()
+		if err != nil {
+			usage()
+			log.Fatal("run service error: ", err.Error())
+			return
+		}
+		fmt.Printf("the status of service %s :%d", serviceName, status)
 		return
 	case "run":
 		err := s.Run()
