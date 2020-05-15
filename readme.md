@@ -13,26 +13,27 @@ windows运行build.bat即可
 ## 使用方法
 
 ```shell
-ws [arguments] <command>
+ws <command> [service name] options.. args ...
 
-The arguments are:
-  -a args
-        specify serivce application args using ','
-  -d description
-        service description
+The command should be:
+  install       install service
+  uninstall     remove service
+  start         start service
+  stop          stop service
+  restart       restart service
+  status        remove service
+
+The options are:
   -e env
         specify serivce application env, eg. 'key1=value1,key2=value2'
-  -help
-        for more help
-  -n name
-        service name
+  -l relative path
+        specify service log relative path (default "./")
   -p path
         specify service application path
   -w workspace
         specify service application  workspace
 
-The command should be:
-  install        install service
-  remove         remove service
+Using args to specify args for application
+
 ```
 
