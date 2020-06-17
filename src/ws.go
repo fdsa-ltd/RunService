@@ -35,10 +35,10 @@ func (p *program) run() {
 	cmd = exec.Command(p.Name, p.Args[1:]...)
 	cmd.Dir = p.WorkSpace
 	cmd.Env = append(os.Environ(), p.Env...)
-	stdout, err := os.OpenFile(p.WorkSpace+"/"+p.logPath+"/out."+time.Now().Format("20060102150405")+".log", os.O_CREATE|os.O_WRONLY, 0600)
+	stdout, err := os.OpenFile(p.WorkSpace+"/"+p.logPath+"/out."+time.Now().Format("20200202")+".log", os.O_CREATE|os.O_WRONLY, 0600)
 
 	if err != nil {
-		log.Fatalf("create log file:%s error:%s", p.WorkSpace+"/"+p.logPath+"/out."+time.Now().Format("20060102150405")+".log", err.Error())
+		log.Fatalf("create log file:%s error:%s", p.WorkSpace+"/"+p.logPath+"/out."+time.Now().Format("20200202")+".log", err.Error())
 	}
 	defer stdout.Close()
 	// cmd.Stdout = stdout
@@ -73,9 +73,9 @@ func usage() {
 var cmdLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 func main() {
-	dir := cmdLine.String("w", "", "specify service application  `workspace`")
+	dir := cmdLine.String("w", "", "specify service absolute `workspace` path")
 	env := cmdLine.String("e", "", "specify serivce application `env`, eg. 'key1=value1,key2=value2'")
-	path := cmdLine.String("p", "", "specify service application `path`")
+	path := cmdLine.String("p", "", "specify service absolute application `path`")
 	logPath := cmdLine.String("l", "./", "specify service log `relative path`")
 
 	if len(os.Args) < 3 {
@@ -93,7 +93,7 @@ func main() {
 		workspace, _ = os.Getwd()
 	}
 
-	file, err := os.OpenFile(workspace+"/"+*logPath+"/ws."+time.Now().Format("20060102150405")+".log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(workspace+"/"+*logPath+"/ws."+time.Now().Format("20200202")+".log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open info log file:", err.Error())
 		return
@@ -114,8 +114,8 @@ func main() {
 	args = append(args, cmdLine.Args()...)
 
 	svcConfig := &service.Config{
-		Name:             serviceName, //服务名称
-		DisplayName:      serviceName, //显示名称
+		Name:             serviceName,                        //服务名称
+		DisplayName:      serviceName,                        //显示名称
 		Description:      "This service runs " + serviceName, //服务描述
 		Arguments:        args,
 		WorkingDirectory: workspace,
@@ -141,7 +141,7 @@ func main() {
 			usage()
 			log.Fatalf("Install service %s error: %s\n", serviceName, err.Error())
 		}
-		log.Printf("The service %s is installed", serviceName )
+		log.Printf("The service %s is installed", serviceName)
 		return
 	case "uninstall":
 		err := s.Uninstall()
@@ -149,7 +149,7 @@ func main() {
 			usage()
 			log.Fatalf("Uninstall service %s error: %s\n", serviceName, err.Error())
 		}
-		log.Printf("The service %s is removed" ,serviceName )
+		log.Printf("The service %s is removed", serviceName)
 		return
 	case "start":
 		err := s.Start()

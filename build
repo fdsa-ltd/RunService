@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+
+set name=`basename "$0"`
+if [ ! -f go.mod ]; then
+    go mod init fdsa.ltd/$name
+fi
+
+# OLDGOPATH="$GOPATH"
+# export GOPATH=`pwd`
+
+# gofmt -w src
+set GOOS=linux
+set GOARCH=amd64
+go build -o ./bin/$name fdsa.ltd/$name/src
+
+set GOOS=windows
+set GOARCH=amd64
+go build -o ./bin/$name.exe fdsa.ltd/$name/src
+
+# rm -f go.mod
+# rm -f go.sum
+echo finished

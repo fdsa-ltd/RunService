@@ -8,12 +8,10 @@
 
 windows运行build.bat即可
 
-
-
 ## 使用方法
 
 ```shell
-ws <command> [service name] options.. args ...
+rs <command> [service name] options.. args ...
 
 The command should be:
   install       install service
@@ -29,9 +27,9 @@ The options are:
   -l relative path
         specify service log relative path (default "./")
   -p path
-        specify service application path
+        specify service absolute application path
   -w workspace
-        specify service application  workspace
+        specify service absolute application workspace
 
 Using args to specify args for application
 
