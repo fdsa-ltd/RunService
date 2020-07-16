@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+chmod +x ./bin/rs
+cp ./bin/rs /usr/local/bin -f
