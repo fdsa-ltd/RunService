@@ -4,9 +4,18 @@
 
 实现将应用程序以操作系统的Service运行
 
-## 编译
+## 安装
 
-windows运行build.bat即可
+### 编译
+安装好golang
+
+Windows下运行.\build.bat，Linux下运行./build，即可在bin生成可执行文件。
+
+### 安装
+
+在Windows下 move .\bin\rs.exe C:\Windows
+
+在Linux下 mv ./bin/rs /usr/local/bin
 
 ## 使用方法
 
